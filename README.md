@@ -24,7 +24,7 @@ To interact with a GUI type:
 streamlit run rag_chatbot_ui.py
 ```
 ## User Interface
-![chatbot_ss.png](img/chatbot_ss.png)
+![chatbot_ss.png](img/chatbot_ss.PNG)
 ## Reference
 
 * LangChain

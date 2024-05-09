@@ -1,6 +1,12 @@
 # RAG Chatbot
 RAG (Retrieval-Augmented Generation) ChatBot that provides answers by incorporating contextual knowledge base provided within files.
 
+This can handle following file format
+* pdf
+* doc
+* docx
+* txt
+
 ## Use Cases
 * Customer support chatbot which can handle users in general enquiries.
 * System can be extened to handle advance user queries by embedding user speficis details.

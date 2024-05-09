@@ -9,7 +9,10 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain_community.embeddings import BedrockEmbeddings
 import numpy as np
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFDirectoryLoader 
+from langchain_text_splitters import MarkdownTextSplitter
+from langchain_community.document_loaders import PyPDFLoader 
+from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.vectorstores import FAISS
 
 
@@ -18,14 +21,30 @@ bedrock=boto3.client(service_name="bedrock-runtime")
 bedrock_embeddins=BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0", region_name='us-east-1')
 
 def data_ingestion():
-    loader=PyPDFDirectoryLoader("knowledge-base")
-    documents=loader.load()
-    text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=10)
+    documents=[]
+    for file in os.listdir("knowledge-base"):
+        if file.endswith(".pdf"):
+            loader=PyPDFLoader("./knowledge-base/"+file)
+            documents.extend(loader.load())
+            print("Loaded ",file,sep=" -------------- ")
+        elif file.endswith(".docx") or file.endswith(".doc"): 
+            loader=Docx2txtLoader("./knowledge-base/"+file)
+            documents.extend(loader.load())
+            print("Loaded ",file,sep=" -------------- ")
+        elif file.endswith(".txt"):
+            loader=TextLoader("./knowledge-base/"+file)
+            documents.extend(loader.load())
+            print("Loaded ",file,sep=" -------------- ")       
+
+    print("Total number of loaded files ",len(documents),sep=" ----- ")        
+    text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
     docs=text_splitter.split_documents(documents)
     return docs
 
 def get_vector_store(docs):
     global vectorstore_faiss
+    if len(docs)==0:
+        print("Please put some file in knowledge-base folder")
     vectorstore_faiss=FAISS.from_documents(docs,bedrock_embeddins)
     vectorstore_faiss.save_local("knowledge-base-faiss-index")
 
